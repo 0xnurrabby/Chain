@@ -1,0 +1,45 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+.card {
+  @apply bg-base-card rounded-3xl shadow-soft p-6;
+}
+
+.card-tint {
+  @apply rounded-3xl shadow-soft p-6;
+}
+
+.btn {
+  @apply px-4 py-2 rounded-2xl font-medium transition-all;
+}
+
+.btn-primary {
+  @apply btn bg-blue-600 text-white hover:bg-blue-500 active:scale-[0.98];
+}
+
+.btn-secondary {
+  @apply btn bg-gray-100 hover:bg-gray-200;
+}
+
+
+/* ---- Explorer hardening ---- */
+.explorer-safewrap * {
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+}
+.explorer-safewrap pre,
+.explorer-safewrap .mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+  white-space: pre-wrap !important;
+  line-height: 1.6 !important;
+}
+.explorer-safewrap .field {
+  display: block;
+  margin-bottom: 10px;
+}
