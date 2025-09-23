@@ -1,4 +1,4 @@
-// vite.config.ts (js চাইলে .js করে নাও)
+// vite.config.ts
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import fs from 'node:fs'
@@ -8,14 +8,14 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '') // loads .env* into process.env
 
   // ---- General envs (with safe defaults) ----
-  const HOST = env.VITE_HOST || '0.0.0.0'         // LAN/VPS থেকে অ্যাক্সেসের জন্য 0.0.0.0
+  const HOST = env.VITE_HOST || '0.0.0.0'         // LAN/VPS access
   const PORT = Number(env.VITE_PORT || 5173)
   const API_PREFIX = env.VITE_API_PREFIX || '/api'
 
-  // Backend URL (prod বা preview এ দরকার; dev এ proxy target)
+  // Backend URL (prod/preview); dev proxy target
   const BACKEND_URL = (env.VITE_BACKEND_URL || 'http://127.0.0.1:3001').replace(/\/+$/, '')
 
-  // Optional HTTPS for dev (e.g., cookies / OAuth need secure)
+  // Optional HTTPS for dev (cookies / OAuth)
   const USE_HTTPS = env.VITE_HTTPS === '1'
   const httpsConfig =
     USE_HTTPS
@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => {
   const hmr =
     env.VITE_HMR_HOST
       ? {
-          host: env.VITE_HMR_HOST,                 // e.g., nurrabby.xyz or 203.0.113.10
+          host: env.VITE_HMR_HOST,                 // e.g. nurrabby.xyz
           port: Number(env.VITE_HMR_PORT || PORT),
           protocol: env.VITE_HMR_PROTOCOL || (USE_HTTPS ? 'wss' : 'ws'),
         }
@@ -42,8 +42,7 @@ export default defineConfig(({ mode }) => {
     changeOrigin: true,
     secure: false,           // allow self-signed during dev
     ws: true,                // WebSocket proxying
-    // keep the same path prefix (/api -> /api). If your backend is root, use:
-    // rewrite: p => p.replace(new RegExp(`^${API_PREFIX}`), ''),
+    // rewrite: p => p.replace(new RegExp(`^${API_PREFIX}`), ''), // if backend is rooted
   }
 
   return {
@@ -58,27 +57,32 @@ export default defineConfig(({ mode }) => {
       },
     },
 
-    // ---- DEV server (works on localhost, LAN IP, VPS IP, domain) ----
+    // ---- DEV server (localhost, LAN IP, VPS IP, domain) ----
     server: {
-      host: HOST,                // 0.0.0.0 -> LAN/VPS থেকে খুলে যাবে
+      host: HOST,
       port: PORT,
       strictPort: true,
-      https: httpsConfig,        // set VITE_HTTPS=1 and provide certs to enable
-      hmr,                       // needed only when dev server is behind a proxy or on VPS
+      https: httpsConfig,
+      hmr,
       cors: {
-        origin: true,            // reflect request origin
-        credentials: true,       // allow cookies if needed
+        origin: true,
+        credentials: true,
       },
+      // ✅ allowlist your domains (fixes "host not allowed")
+      // safer: list specific hosts instead of 'all'
+      allowedHosts: ['nurrabby.xyz', 'www.nurrabby.xyz'],
       proxy: {
         [API_PREFIX]: proxyConfig,
       },
     },
 
-    // ---- vite preview (for quick prod-like test) ----
+    // ---- vite preview (prod-like quick test) ----
     preview: {
       host: HOST,
       port: Number(env.VITE_PREVIEW_PORT || 5174),
       https: httpsConfig,
+      // keep same allowlist for preview too
+      allowedHosts: ['nurrabby.xyz', 'www.nurrabby.xyz'],
       proxy: {
         [API_PREFIX]: proxyConfig,
       },
